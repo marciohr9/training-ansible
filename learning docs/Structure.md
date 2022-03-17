@@ -6,10 +6,10 @@ O Ansible funciona em um servidor como um serviço independente gerindo e atuali
 
 A **máquina de controle** que é a principal gerênciadora dos projetos com **Ansible** conta com uma estrutura distribuida em cima de 3 tipos de scripts da seguinte forma:
     
-    * **Inventário** (  Lista as Máquinas que serão configuradas ).
-    * **Playbook** ( arquivo em que normalmente fica todo o passo a passo de configuração e estruturação do projeto).
-    * **Roles** ( Formas de modularização do código ).
+  - **Inventário** (  Lista as Máquinas que serão configuradas ).
+  - **Playbook** ( arquivo em que normalmente fica todo o passo a passo de configuração e estruturação do projeto).
+  - **Roles** ( Formas de modularização do código ).
 
 Exemplo visual abaixo.
 
-![IaC-Ansible] (https://i.imgur.com/3h2NMZR.jpg)
+[!IaCAnsible](https://i.imgur.com/3h2NMZR.jpg)
