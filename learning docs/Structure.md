@@ -12,4 +12,4 @@ A **máquina de controle** que é a principal gerênciadora dos projetos com **A
 
 Exemplo visual abaixo.
 
-[!IaCAnsible](https://i.imgur.com/3h2NMZR.jpg)
+[!IaCAnsible(https://i.imgur.com/3h2NMZR.jpg)]
