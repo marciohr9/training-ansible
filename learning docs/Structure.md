@@ -10,6 +10,6 @@ A **máquina de controle** que é a principal gerênciadora dos projetos com **A
   - **Playbook** ( arquivo em que normalmente fica todo o passo a passo de configuração e estruturação do projeto).
   - **Roles** ( Formas de modularização do código ).
 
-Exemplo visual abaixo.
+### Exemplo visual abaixo.
 
 ![alt IaC-Ansible](https://i.imgur.com/3h2NMZR.jpg)
