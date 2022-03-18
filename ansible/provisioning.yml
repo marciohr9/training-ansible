@@ -1,0 +1,31 @@
+---
+# indicação dos hosts que devem receber a atualização
+- hosts: all
+  #campo obrigatório task para informar as tarefas a serem executadas.
+  tasks:
+    - name: 'Instalando os pacotes em forma de loop com with_items'
+      apt:
+        name: "{{ item }}"
+        state: latest
+      become: yes
+      with_items:
+        - php5
+        - apache2
+        - libapache2-mod-php5
+        - php5-gd
+    # Exemplo de uma instrução de atualização unica.
+    - name: 'Instalando PHP'
+      apt: 
+        name: php5
+        state: latest
+      become: yes
+    - name: 'Instalando Apache2'
+      apt:
+        name: apache2
+        state: latest
+      become: yes
+    - name: 'Instala modphp'
+      apt:
+        name: libapache2-mod-php5
+        state: latest
+      become: yes

@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Vagrant and Virtual Box VM files
+/vagrant/.vagrant
