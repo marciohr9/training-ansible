@@ -1,36 +1,130 @@
 ---
 # indicação dos hosts que devem receber a atualização
-- hosts: all
+- hosts: wordpress
+  # Handles são tarefas simples que são chamadas em momentos diversos e são criadas para serem chamadas posteriormente
+  handlers:
+    - name: restart apache2
+      service:
+        name: apache2
+        state: restarted
+      become: yes
   #campo obrigatório task para informar as tarefas a serem executadas.
   tasks:
-    # Exemplo utilizando o modo mais novo e compacto para a instalação de multiplas dependencias.
+      ###
+      # Exemplo utilizando o modo mais novo e compacto para a instalação de multiplas dependencias. #
+      ###
     - name: 'Instalando os pacotes em forma de loop com with_items'
       apt:
-        name: ['php5', 'apache2', 'libapache2-mod-php5', 'php5-gd', 'libssh2-php', 'php5-mcrypt', 'mysql-server-5.6', 'python-mysqldb', 'php5-mysql']
+        name: ['php5', 'apache2', 'libapache2-mod-php5', 'php5-gd', 'libssh2-php', 'php5-mcrypt', 'php5-mysql']
         state: latest
       become: yes
-    # Exemplo de uma instrução de atualização unica.
+      #####
+      ## Exemplo de uma instrução de atualização unica. ##
+      #####
     - name: 'Instalando PHP'
       apt: 
         name: php5
         state: latest
       become: yes
+
     - name: 'Instalando Apache2'
       apt:
         name: apache2
         state: latest
       become: yes
+
     - name: 'Instala modphp'
       apt:
         name: libapache2-mod-php5
         state: latest
       become: yes
-    # Como é feita a configuração de um banco no playbook do ansible.
+
+      # Como é feita a configuração de um banco no playbook do ansible.
+      # baixando arquivos de repositórios e instalando (no caso o wordpress).
+    - name: "Baixando wordpress"
+      get_url:
+        url: 'https://wordpress.org/latest.tar.gz'
+        dest: '/tmp/wordpress.tar.gz'
+
+      # extraindo wordpress com componente de extrassão do ansible unarchive
+    - name: "extraindo wordpress"
+      unarchive: 
+        src: '/tmp/wordpress.tar.gz'
+        dest: /var/www/html/
+        remote_src: yes
+      become: yes
+
+      # copiando arquivo via copy
+    - copy:
+        src: '/var/www/wordpress/wp-config-sample.php'
+        dest: '/var/www/wordpress/wp-config.php'
+        remote_src: yes
+      become: yes
+
+      # alterando váriaveis necessárias do arquivo de configuração via expressão regular usando o replace.
+    - name: "alterando nome do arquivo."
+      replace:
+        path: '/var/www/wordpress/wp-config.php'
+        regexp: "{{ item.regex }}"
+        replace: "{{ item.value }}"
+        backup: yes
+      with_items:
+        - { regex: 'database_name_here', value: "{{ wp_db_name }}" }
+        - { regex: 'username_here', value: "{{ wp_username  }}" }
+        - { regex: 'password_here', value: '12345' }
+        - { regex: 'localhost', value: '192.168.56.3' }
+
+      become: yes
+
+      # movendo arquivos de configuração wordpress
+    - name: "alterando arquivo de configuração apache2 para o wordpress."
+      copy:
+        src: 'files/000-default.conf'
+        dest: '/etc/apache2/sites-available/000-default.conf'
+      become: yes
+      # Tag usada para posteriormente chamar em tarefas criadas handlers pre setadas anteriormente.
+      notify:
+        - restart apache2
+
+- hosts: database
+  handlers:
+    - name: restart mysql
+      service:
+        name: mysql
+        state: restarted
+      become: yes
+      
+  tasks:
+    # Exemplo utilizando o modo mais novo e compacto para a instalação de multiplas dependencias.
+    - name: 'Instalando os pacotes em forma de loop com with_items'
+      apt:
+        name: ['mysql-server-5.6', 'python-mysqldb', ]
+        state: latest
+      become: yes
     # name: 'Criação e Configuração do Banco MySQL'
     - name: "Cria o banco do MySQL"
       mysql_db:
-        name: wordpress_db
+        name: '{{ wp_db_name }}'
         login_user: root
-        state: present    # status possiveis no mySQL: present (criar banco) | absent (para exclusao) | dump (retirar informações de estruturas) | import (para importar informações ao banco)
-        
-    
+        state: present    # status possiveis no mySQL: present (criar banco) | absent (para exclusao) | dump (retirar informações de estruturas) | import (para importar informações ao banco) 
+    # criando usuário no banco
+    - name: "Criar usuário MySQL"
+      mysql_user:
+        login_user: root
+        name: {{ wp_username  }}
+        password: 123456
+        priv: '{{ wp_db_name }}.*:ALL'
+        state: present
+        host: '{{ item }}'
+      with_items:
+        - 'localhost'
+        - '127.0.0.1'
+        - '192.168.56.2'
+    # mais um exemplo de copy de arquivo para máquina remota
+    - name: "Configurando mysql para conexões remotas"
+      copy:
+        src: 'files/my.cnf'
+        dest: '/etc/mysql/my.cnf'
+      become: yes
+      notify:
+        - restart mysql
