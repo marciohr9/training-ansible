@@ -56,23 +56,23 @@
 
       # copiando arquivo via copy
     - copy:
-        src: '/var/www/wordpress/wp-config-sample.php'
-        dest: '/var/www/wordpress/wp-config.php'
+        src: '{{ wp_installation_dir }}/wp-config-sample.php'
+        dest: '{{ wp_installation_dir }}/wp-config.php'
         remote_src: yes
       become: yes
 
       # alterando váriaveis necessárias do arquivo de configuração via expressão regular usando o replace.
     - name: "alterando nome do arquivo."
       replace:
-        path: '/var/www/wordpress/wp-config.php'
+        path: '{{ wp_installation_dir }}/wp-config.php'
         regexp: "{{ item.regex }}"
         replace: "{{ item.value }}"
         backup: yes
       with_items:
         - { regex: 'database_name_here', value: "{{ wp_db_name }}" }
         - { regex: 'username_here', value: "{{ wp_username  }}" }
-        - { regex: 'password_here', value: '12345' }
-        - { regex: 'localhost', value: '192.168.56.3' }
+        - { regex: 'password_here', value: "{{ wp_user_password }}" }
+        - { regex: 'localhost', value: "{{ wp_db_ip }}" }
 
       become: yes
 
@@ -111,15 +111,15 @@
     - name: "Criar usuário MySQL"
       mysql_user:
         login_user: root
-        name: {{ wp_username  }}
-        password: 123456
+        name: '{{ wp_username  }}'
+        password: '{{ wp_user_password }}'
         priv: '{{ wp_db_name }}.*:ALL'
         state: present
         host: '{{ item }}'
       with_items:
         - 'localhost'
         - '127.0.0.1'
-        - '192.168.56.2'
+        - '{{ wp_host_ip }}'
     # mais um exemplo de copy de arquivo para máquina remota
     - name: "Configurando mysql para conexões remotas"
       copy:
