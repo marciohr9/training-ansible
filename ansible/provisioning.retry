@@ -1,5 +1,4 @@
 ---
-
   ## ordem de regras que serão executadas exclusivamente nas máquinas pertencentes ao grupo "database" no arquivo de hosts.
 - hosts: database
 

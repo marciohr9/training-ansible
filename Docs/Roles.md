@@ -13,3 +13,5 @@ Como fica a estruturação da pasta roles.
       _( pasta ou tag padrão usada onde se contem todas as tarefas a serem executadas por aquele grupo de máquinas )_
     - templastes
       _( template é um caso especial, o ansible faz uso dos templates em jinja ou seja todos os arquivos na pasta de template devem terminar com a extensão **.j2** dentro dos templates você pode substituir palavras ou áreas especificas pelas váriaveis previamente definidas na pasta de **group\_vars** da mesma forma que você utiliza essas váriaveis dentro do playbook para facilitar o reuso e dificultar o erro por mudanças constantes no código. )_
+    - defaults
+      _( pasta onde as configurações defaults a serem usadas caso nenhuma especifica seja feita para a task)_
