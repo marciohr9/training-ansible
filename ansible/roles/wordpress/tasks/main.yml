@@ -1,0 +1,47 @@
+---
+#####
+# Como é feita a configuração de um banco no playbook do ansible.
+# baixando arquivos de repositórios e instalando (no caso o wordpress).
+- name: "Baixando wordpress"
+  get_url:
+    url: 'https://wordpress.org/latest.tar.gz'
+    dest: '/tmp/wordpress.tar.gz'
+
+  # extraindo wordpress com componente de extrassão do ansible unarchive
+- name: "extraindo wordpress"
+  unarchive: 
+    src: '/tmp/wordpress.tar.gz'
+    dest: /var/www/html/
+    remote_src: yes
+  become: true
+
+  # copiando arquivo via copy
+- copy:
+    src: '{{ wp_installation_dir }}/wp-config-sample.php'
+    dest: '{{ wp_installation_dir }}/wp-config.php'
+    remote_src: yes
+  become: true
+
+  # alterando váriaveis necessárias do arquivo de configuração via expressão regular usando o replace.
+- name: "alterando nome do arquivo."
+  replace:
+    path: '{{ wp_installation_dir }}/wp-config.php'
+    regexp: "{{ item.regex }}"
+    replace: "{{ item.value }}"
+    backup: yes
+  loop:
+    - { regex: 'database_name_here', value: '{{ wp_db_name }}' }
+    - { regex: 'username_here', value: '{{ wp_username  }}' }
+    - { regex: 'password_here', value: '{{ wp_user_password }}' }
+    - { regex: 'localhost', value: '{{ wp_db_ip }}' }
+  become: true
+
+# Exemplo de uma configuração usando um arquivo de template para movendo para o host desejado.
+# essa tag "template" necessita dos arquivos com extensão .j2 na pasta por padrão templates e usa as variáveis setadas nos arquivos de variáreis 
+- name: "Configurar Apache para servir Wordpress"
+  template:
+    src: 'templates/000-default.conf.j2'
+    dest: '/etc/apache2/sites-available/000-default.conf'
+  become: true
+  notify: 
+    - restart apache2

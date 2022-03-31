@@ -1,0 +1,37 @@
+---
+# Exemplo utilizando o modo mais novo e compacto para a instalação de multiplas dependencias.
+- name: 'Instalando os pacotes em forma de loop com loop:'
+  apt:
+    name: ['mysql-server-5.6', 'python-mysqldb', ]
+    state: latest
+  become: true
+
+# name: 'Criação e Configuração do Banco MySQL'
+- name: "Cria o banco do MySQL"
+  mysql_db:
+    name: '{{ wp_db_name }}'
+    login_user: root
+    state: present    # status possiveis no mySQL: present (criar banco) | absent (para exclusao) | dump (retirar informações de estruturas) | import (para importar informações ao banco) 
+
+# criando usuário no banco
+- name: "Criar usuário MySQL"
+  mysql_user:
+    login_user: root
+    name: '{{ wp_username  }}'
+    password: '{{ wp_user_password }}'
+    priv: '{{ wp_db_name }}.*:ALL'
+    state: present
+    host: '{{ item }}'
+  loop:
+    - 'localhost'
+    - '127.0.0.1'
+    - '{{ wp_host_ip }}'
+
+# mais um exemplo de copy de arquivo para máquina remota
+- name: "Configurando mysql para conexões remotas"
+  copy:
+    src: 'files/my.cnf'
+    dest: '/etc/mysql/my.cnf'
+  become: true
+  notify:
+    - restart mysql

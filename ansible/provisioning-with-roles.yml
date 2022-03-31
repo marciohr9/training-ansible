@@ -1,0 +1,11 @@
+  ## ordem de regras que serão executadas exclusivamente nas máquinas pertencentes ao grupo "database" no arquivo de hosts.
+- hosts: database
+  ## A tag roles invoca a lista dos arquivos que estão por padrão dentro da pasta "roles/<nome_role>" em um arquivo main.yml
+  ## a partir dessa role o sistema executa as handles e as tasks deixando o código mais bem ordenado e fácilita alterações
+  roles:
+    - mysql
+
+- host: wordpress
+  roles:
+    - webserver
+    - wordpress
